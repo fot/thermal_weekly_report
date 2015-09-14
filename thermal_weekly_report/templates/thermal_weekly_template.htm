@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="ThermalWeeklyReport.css">
+    <title>
+        THERMAL Weekly {{ dayrange }}
+    </title>
+</head>
+
+<body>
+
+<div id="header">
+    <h1>
+        Thermal Weekly Report for {{ dayrange }}
+    </h1>
+</div>
+
+<div id="content">
+    <div id="main">
+            
+        <h2>
+            Configuration:
+        </h2>   
+         
+        <p>
+            In April of 2008 the ISIM detector housing heaters were disabled and are expected to remain in this state for the remainder of the mission.
+        </p>
+        
+        <p>
+            On April 28th of 2009 the telescope secondary database calibration was changed to reflect the A side calibration with non-critical heater setpoints set to 66F instead of their nominal calibration for the B side heaters. This change allows the secondary database to be used as a contingency option to drain the batteries should Chandra enter a short eclipse too hot. Ensuring the batteries are properly drained prior to exiting a short eclipse will help prevent the power bus from exceeding 35v.    
+        </p>        
+        
+        <p>
+            In August of 2009 the ISIM FA6 abort heater was disabled and is expected to remain in this state for the remainder of the mission.
+        </p>
+
+        <p>
+            On December 8th, 2014, the telescope primary, secondary, and tertiary databases were modified to switch all thermistors that contribute to the OBA_AVE and TSSMAX telescope healthchecks to wide range read mode to prevent several of these thermistors from reaching a temperature saturation point. This change ensures temperatures in these regions will continue to be fully visible for the forseeable future.
+        </p>
+    
+        <h2>
+            Performance and Health:
+        </h2>
+            
+        <p>
+            The spacecraft and telescope thermal performance was nominal over this report period. Telescope average daily power was {{ power }} Watts.
+        </p>    
+        
+        
+        <h2>
+            Unexpected Thermal Limit Violations:
+        </h2>
+        
+        <p>
+        <div id="violations">
+            {% include "limitviolations.htm" %}
+        </div>
+        
+
+        <h2>
+            Thermal Limit Changes:
+        </h2>
+        
+        <p>
+        <div id="limitchanges">
+            {% include "limitchanges.htm" %}
+        </div>
+        </p>    
+        
+        
+        <h2>
+            Long Term Trending:
+        </h2>
+        
+        <p>
+            None.
+        </p>
+        
+        
+        
+        <h2>
+            Major Events:
+        </h2>
+        
+        <p>
+            None.
+        </p>
+        
+               
+        <h2>
+            Eclipses:
+        </h2>
+        
+        <p>
+            {{ eclipse }}
+        </p>
+        
+        
+        <h2>
+            Investigations:
+        </h2>
+        
+        <p>
+            None.
+        </p>
+        
+        
+        <h2>
+            Thermal Models
+        </h2>
+        
+        <p>
+            No updates.
+        </p>
+        
+    </div>
+</div>
+        
+</body>
+</html>

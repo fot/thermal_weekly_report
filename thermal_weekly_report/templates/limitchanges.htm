@@ -1,0 +1,55 @@
+{% if limitchanges|length > 0 %}
+
+    <table id='limitchanges'>
+
+        <tr>    
+            <th>MSID</th>    
+            <th>Set Number</th>  
+            <th>Date</th>            
+            <th>Original Warning Low</th>    
+            <th>Original Caution Low</th>    
+            <th>Original Caution High</th>    
+            <th>Original Warning High</th>    
+            <th>New Warning Low</th>    
+            <th>New Caution Low</th>    
+            <th>New Caution High</th>    
+            <th>New Warning High</th>    
+            <th>Description</th>    
+        </tr>    
+
+        {% for msidsets in limitchanges.keys()|sort %}
+                <tr>
+                    <td>{{ msidsets[0] }}</td>
+                    <td>{{ msidsets[1] }}</td>
+                    <td>{{ limitchanges[msidsets]['after'][7][0:10] }}
+
+            {% if limitchanges[msidsets]['before']|length > 0 %}
+                    <td>{{ limitchanges[msidsets]['before'][3] }}</td>
+                    <td>{{ limitchanges[msidsets]['before'][4] }}</td>
+                    <td>{{ limitchanges[msidsets]['before'][5] }}</td>
+                    <td>{{ limitchanges[msidsets]['before'][6] }}</td>
+            {% else %}
+                    <td> New MSID Set</td><td></td><td></td><td></td>
+            {% endif %}
+
+            {% if limitchanges[msidsets]['after'][8] > 0 %}
+                    <td>{{ limitchanges[msidsets]['after'][3] }}</td>
+                    <td>{{ limitchanges[msidsets]['after'][4] }}</td>
+                    <td>{{ limitchanges[msidsets]['after'][5] }}</td>
+                    <td>{{ limitchanges[msidsets]['after'][6] }}</td>
+            {% else %}
+                    <td>MSID Set Disabled</td><td></td><td></td><td></td>
+            {% endif %}
+
+                    <td>{{ limitchanges[msidsets]['description'] }}</td>
+
+                </tr>
+
+        {% endfor %}
+
+    </table>
+{% else %}
+    <p>No thermal limit or expected state changes.</p>
+
+{% endif %}
+

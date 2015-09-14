@@ -1,0 +1,79 @@
+﻿
+html {
+    background-color:rgb(255,255,255);
+    
+}
+
+body {
+    text-align:left;
+    font-family:‘Palatino Linotype’, ‘Book Antiqua’, Palatino linotype, serif;
+}
+
+h1, h2, h3, h4, p, table, ul {
+    color:rgb(80,80,80);
+    font-style:normal;    
+}
+
+h1 {
+    margin-left: 5%;
+}
+h2 {
+    margin-left:5%;
+}
+
+h3, h4 {
+    margin-left:7.5%;
+}
+
+p {
+    margin-top:1em;
+    margin-bottom:1em;
+    margin-right:7.5%;
+    margin-left:7.5%;
+    font-size:1.0em;
+}
+
+ul {
+    margin-top:1em;
+    margin-bottom:1em;
+    margin-right:7.5%;
+    margin-left:7.5%;
+    font-size:1.0em;
+    list-style-type:disc;
+}
+
+
+table, th, td {
+    border:1px solid rgb(150,150,150);
+    font-size:1.0em;
+    border-collapse: collapse;
+    font-family:‘Lucida Console’, Monaco, monospace;
+    font-size:0.8em;
+}
+
+table {
+    margin-left:7.5%;
+    margin-right: 7.5%;
+    width:85%;
+}
+
+th, td {
+    padding:0.3em;
+    padding-left: 0.5em;
+}
+
+th {
+    font-weight:bold;
+}
+
+/*th.msid {
+    width:15%;
+}
+
+th.limitfrom, th.limitto {
+    width:20%;
+}
+
+th.msiddescription {
+    width:30%;
+}*/
