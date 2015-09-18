@@ -8,6 +8,7 @@ from os.path import expanduser
 import cPickle as pickle
 from shutil import copyfile
 import argparse
+import os
 
 import Ska.engarchive.fetch_eng as fetch
 from Chandra.Time import DateTime
@@ -344,14 +345,7 @@ def write_report(thermal_msid_checks_file, t1, t2):
     return reportfilename
 
 
-def post_report():
-
-     #----------------------------------
-    # Add and Parse Command Line Arguments
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--rootdir', default=None)
-    args = vars(parser.parse_args())
-    rootdir = args['rootdir']
+def post_report(rootdir):
 
     dirs = os.listdir(rootdir)
     removed = [dirs.pop(dirs.index(d)) for d in dirs if len(d) != 15]
@@ -360,13 +354,28 @@ def post_report():
         files = os.listdir(reportdir)
         t1str = d[:7]
         t2str = d[8:]
+        t1 = DateTime(t1str + '.000000000').date
+        t2 = DateTime(t2str + '.235959999').date
+
         thermalfile = 'THERMAL_Weekly_{}-{}.htm'.format(t1str, t2str)
         if thermalfile not in files:
-            t1 = DateTime(t1str + '.000000000').date
-            t2 = DateTime(t2str + '.235959999').date
+            thermal_msid_checks_file = home + '/AXAFDATA/weekly_report_data/thermalmsiddata.pkl'
+            newfile = write_report(thermal_msid_checks_file, t1, t2)
+            copyfile(newfile, pathjoin(reportdir, newfile))
+            copyfile('ThermalWeeklyReport.css', pathjoin(reportdir, 'ThermalWeeklyReport.css'))
+            print 'copied files'
 
-        thermal_msid_checks_file = home + '/AXAFDATA/weekly_report_data/thermalmsiddata.pkl'
-        newfile = write_report(t1, t2)
-        copyfile(newfile, pathjoin(reportdir, newfile))
-        copyfile('ThermalWeeklyReport.css', pathjoin(reportdir, 'ThermalWeeklyReport.css'))
-        print 'copied files'
+
+if __name__ == '__main__':
+
+    #----------------------------------
+    # Add and Parse Command Line Arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--rootdir', default=None)
+    args = vars(parser.parse_args())
+    rootdir = args['rootdir']
+
+    post_report(rootdir)
+
+
+
