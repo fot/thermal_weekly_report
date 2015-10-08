@@ -221,37 +221,42 @@ def process_violations(msid, violations):
         if 'high' in limtype.lower():
             if limtype not in violation_dict.keys():
                 violation_dict.update({limtype:{'starttime':v[0][0], 'stoptime':v[0][-1], 'num_excursions':1,
-                                                'extrema':np.max(v[1]), 'limit':v[2][0], 'setid':v[3][0]}})
+                                                'extrema':np.max(v[1]), 'limit':v[2][0], 'setid':v[3][0],
+                                                'duration':v[0][-1] - v[0][0]}})
             else:
                 violation_dict[limtype]['extrema'] = np.max((np.max(v[1]), violation_dict[limtype]['extrema']))
                 violation_dict[limtype]['starttime'] = np.min((v[0][0], violation_dict[limtype]['starttime']))
                 violation_dict[limtype]['stoptime'] = np.max((v[0][0], violation_dict[limtype]['stoptime']))
                 violation_dict[limtype]['num_excursions'] = violation_dict[limtype]['num_excursions'] + 1
-                
+                violation_dict[limtype]['duration'] = violation_dict[limtype]['duration'] + v[0][-1] - v[0][0]
+
         elif 'low' in limtype.lower():
             if limtype not in violation_dict.keys():
                 violation_dict.update({limtype:{'starttime':v[0][0], 'stoptime':v[0][-1], 'num_excursions':1,
-                                                'extrema':np.min(v[1]), 'limit':v[2][0], 'setid':v[3][0]}})
+                                                'extrema':np.min(v[1]), 'limit':v[2][0], 'setid':v[3][0],
+                                                'duration':v[0][-1] - v[0][0]}})
             else:
                 violation_dict[limtype]['extrema'] = np.min((np.min(v[1]), violation_dict[limtype]['extrema']))
                 violation_dict[limtype]['starttime'] = np.min((v[0][0], violation_dict[limtype]['starttime']))
                 violation_dict[limtype]['stoptime'] = np.max((v[0][0], violation_dict[limtype]['stoptime']))
                 violation_dict[limtype]['num_excursions'] = violation_dict[limtype]['num_excursions'] + 1
+                violation_dict[limtype]['duration'] = violation_dict[limtype]['duration'] + v[0][-1] - v[0][0]
 
         elif 'state' in limtype.lower():
             if limtype not in violation_dict.keys():
                 violation_dict.update({limtype:{'starttime':v[0][0], 'stoptime':v[0][-1], 'num_excursions':1,
-                                                'extrema':v[1][0], 'limit':v[2][0], 'setid':v[3][0]}})
+                                                'extrema':v[1][0], 'limit':v[2][0], 'setid':v[3][0],
+                                                'duration':v[0][-1] - v[0][0]}})
             else:
                 violation_dict[limtype]['starttime'] = np.min((v[0][0], violation_dict[limtype]['starttime']))
                 violation_dict[limtype]['stoptime'] = np.max((v[0][0], violation_dict[limtype]['stoptime']))
                 violation_dict[limtype]['num_excursions'] = violation_dict[limtype]['num_excursions'] + 1
+                violation_dict[limtype]['duration'] = violation_dict[limtype]['duration'] + v[0][-1] - v[0][0]
 
                 
     for limittype in ['warning_low', 'caution_low', 'caution_high', 'warning_high', 'state']:
         if limittype in violation_dict.keys():
-            violation_dict[limittype]['duration'] = (violation_dict[limittype]['stoptime'] 
-                - violation_dict[limittype]['starttime']) / 3600.
+            violation_dict[limittype]['duration'] = violation_dict[limittype]['duration'] / 3600.
             violation_dict[limittype]['description'] = desc
             violation_dict[limittype]['startdate'] = DateTime(violation_dict[limittype]['starttime']).date
             violation_dict[limittype]['stopdate'] = DateTime(violation_dict[limittype]['stoptime']).date
@@ -350,7 +355,7 @@ def write_report(thermal_msid_checks_file, t1, t2):
 
     env = ja.Environment(loader=ja.FileSystemLoader('./templates'))
 
-    template = env.get_template('thermal_weekly_template_.htm')
+    template = env.get_template('thermal_weekly_template.htm')
     webpage = template.render(startday=t1,
                               endday=t2,
                               dayrange=dayrange,
