@@ -21,6 +21,8 @@ import pyeclipse as ecl
 import pylimmon
 
 
+AXAFDATA = pathjoin(home, 'AXAFDATA')
+
 # Patch BeautifulSoup prettify to increase indent
 # orig_prettify = bs.prettify
 # r = re.compile(r'^(\s*)', re.MULTILINE)
@@ -137,6 +139,13 @@ def gen_thermal_checklist(filename='thermlist.csv'):
 
 
 def check_violations(thermdict, t1, t2):
+    """Check a list of MSIDs for limit/expected state violations.
+    
+    :param thermdict: Dictionary of MSID information (MSID name, condition type, etc.)
+    :param t1: String containing start date in HOSC format
+    :param t2: String containgin stop date in HOSC format
+    
+    """
     t1 = DateTime(t1).date
     t2 = DateTime(t2).date
 
@@ -156,19 +165,29 @@ def check_violations(thermdict, t1, t2):
             elif thermdict[key]['type'] == 'expst':
                 violations = pylimmon.check_state_msid(key, t1, t2, greta_msid=greta_msid)
                 checkedmsids.append(key)
-
-            if violations['any']:
-                allviolations[key] = violations
-#                 allviolations['any'] = True
-
+                
+            if len(violations) > 0:
+                allviolations[key] = process_violations(key, violations)
+            
         except IndexError:
             print('{} not in DB'.format(key))
             missingmsids.append(key)
 
     return allviolations, missingmsids, checkedmsids
 
-
 def handle_widerange_cases(key, t1, t2, greta_msid):
+    """Handle special widerange MSIDs.
+    
+    :param key: Name of MSID as represented in Ska Engineering Archive
+    :param t1: String containing start time in HOSC format
+    :param t2: String containgin stop time in HOSC format
+    :greta_msid: Name of MSID as represented in GRETA
+    
+    Note: Some MSID names differ between Ska and GRETA. Widerange MSIDs are one such case. For example
+    OOBTHR35 is used for this measurement in both Ska and GRETA before this MSID was switched to 
+    widerange read mode. Afterwards GRETA uses OOBTHR35_WIDE whereas Ska still uses OOBTHR35 for 
+    continuity.
+    """
     if DateTime(t2).secs <= DateTime('2014:342:16:30:00').secs:
         violations = pylimmon.check_limit_msid(key, t1, t2, greta_msid=key)
     elif DateTime(t1).secs >= DateTime('2014:342:16:33:00').secs:
@@ -179,60 +198,66 @@ def handle_widerange_cases(key, t1, t2, greta_msid):
         t1_b = np.min((DateTime(t2).secs, DateTime('2014:342:16:33:00').secs))
         violations_b = pylimmon.check_limit_msid(key, t1_b, t2, greta_msid=greta_msid)
 
-        for limittype in ['warning_low', 'caution_low', 'caution_high', 'warning_high']:
-            if limittype in violations_b.keys():
-                if limittype in violations.keys():
-                    violations[limittype]['extrema'].extend(violations_b[limittype]['extrema'])
-                    violations[limittype]['times '].extend(violations_b[limittype]['times '])
-                    violations[limittype]['timespans '].extend(
-                        violations_b[limittype]['timespans '])
-                else:
-                    violations[limittype] = violations_b[limittype]
-                    violations['any'] = True
-
+        violations.extend(violations_b)
+        
     return violations
 
+def process_violations(msid, violations):
+    """Add contextual information for any limit/expected state violations.
+    
+    :param msid: Current mnemonic
+    :param violations: List of individual violations (list of tuples)
+    
+    """
+    data = fetch.Msid(msid, violations[0][0][0], violations[0][0][-1], stat='5min')
+    try:
+        desc = data.tdb.technical_name
+    except:
+        desc = 'No Description in TDB'
+        
+    violation_dict = {}
+    for v in violations:
+        limtype = v[-1]
+        if 'high' in limtype.lower():
+            if limtype not in violation_dict.keys():
+                violation_dict.update({limtype:{'starttime':v[0][0], 'stoptime':v[0][-1], 'num_excursions':1,
+                                                'extrema':np.max(v[1]), 'limit':v[2][0], 'setid':v[3][0]}})
+            else:
+                violation_dict[limtype]['extrema'] = np.max((np.max(v[1]), violation_dict[limtype]['extrema']))
+                violation_dict[limtype]['starttime'] = np.min((v[0][0], violation_dict[limtype]['starttime']))
+                violation_dict[limtype]['stoptime'] = np.max((v[0][0], violation_dict[limtype]['stoptime']))
+                violation_dict[limtype]['num_excursions'] = violation_dict[limtype]['num_excursions'] + 1
+                
+        elif 'low' in limtype.lower():
+            if limtype not in violation_dict.keys():
+                violation_dict.update({limtype:{'starttime':v[0][0], 'stoptime':v[0][-1], 'num_excursions':1,
+                                                'extrema':np.min(v[1]), 'limit':v[2][0], 'setid':v[3][0]}})
+            else:
+                violation_dict[limtype]['extrema'] = np.min((np.min(v[1]), violation_dict[limtype]['extrema']))
+                violation_dict[limtype]['starttime'] = np.min((v[0][0], violation_dict[limtype]['starttime']))
+                violation_dict[limtype]['stoptime'] = np.max((v[0][0], violation_dict[limtype]['stoptime']))
+                violation_dict[limtype]['num_excursions'] = violation_dict[limtype]['num_excursions'] + 1
 
-def add_violation_info(allviolations):
-    for key in allviolations.keys():
-        try:
-            t1 = DateTime().secs
-            data = fetch.Msid(key, t1 - 3600 * 24 * 30, t1, stat='daily')
-            desc = data.tdb.technical_name
-        except:
-            desc = 'No Description in TDB'
-        allviolations[key]['description'] = desc
+        elif 'state' in limtype.lower():
+            if limtype not in violation_dict.keys():
+                violation_dict.update({limtype:{'starttime':v[0][0], 'stoptime':v[0][-1], 'num_excursions':1,
+                                                'extrema':v[1][0], 'limit':v[2][0], 'setid':v[3][0]}})
+            else:
+                violation_dict[limtype]['starttime'] = np.min((v[0][0], violation_dict[limtype]['starttime']))
+                violation_dict[limtype]['stoptime'] = np.max((v[0][0], violation_dict[limtype]['stoptime']))
+                violation_dict[limtype]['num_excursions'] = violation_dict[limtype]['num_excursions'] + 1
 
-        if 'expst' in allviolations[key]['type']:
-            allviolations[key]['total_duration'] = sum(
-                [b - a for a, b in allviolations[key]['timespans']]) / 3600.
-            allviolations[key]['num_excursions'] = len(allviolations[key]['timespans'])
-            allviolations[key]['expectation'] = '= {}'.format(allviolations[key]['limits'][0])
-            allviolations[key]['observed'] = ', '.join(np.unique(allviolations[key]['extrema']))
-            allviolations[key]['datespans'] = [(DateTime(a).date, DateTime(b).date)
-                                               for a, b in allviolations[key]['timespans']]
-        else:
-            for limtype in ['warning_low', 'caution_low', 'caution_high', 'warning_high']:
-                if limtype in allviolations[key].keys():
-                    allviolations[key][limtype]['total_duration'] = sum([b - a for a, b in
-                        allviolations[key][limtype]['timespans']]) / 3600.
-                    if 'high' in limtype:
-                        allviolations[key][limtype]['observed'] = np.max(
-                            allviolations[key][limtype]['extrema'])
-                        allviolations[key][limtype]['expectation'] = '< {}'.format(
-                            allviolations[key][limtype]['limits'][0])
-                    elif 'low' in limtype:
-                        allviolations[key][limtype]['observed'] = np.min(
-                            allviolations[key][limtype]['extrema'])
-                        allviolations[key][limtype]['expectation'] = '> {}'.format(
-                            allviolations[key][limtype]['limits'][0])
+                
+    for limittype in ['warning_low', 'caution_low', 'caution_high', 'warning_high', 'state']:
+        if limittype in violation_dict.keys():
+            violation_dict[limittype]['duration'] = (violation_dict[limittype]['stoptime'] 
+                - violation_dict[limittype]['starttime']) / 3600.
+            violation_dict[limittype]['description'] = desc
+            violation_dict[limittype]['startdate'] = DateTime(violation_dict[limittype]['starttime']).date
+            violation_dict[limittype]['stopdate'] = DateTime(violation_dict[limittype]['stoptime']).date
+            
+    return violation_dict
 
-                    allviolations[key][limtype]['num_excursions'] = len(
-                        allviolations[key][limtype]['timespans'])
-
-                    allviolations[key][limtype]['datespans'] = [(DateTime(a).date, DateTime(b).date)
-                        for a, b in allviolations[key][limtype]['timespans']]
-    return allviolations
 
 
 def check_limit_changes(t1, t2):
@@ -307,11 +332,10 @@ def write_report(thermal_msid_checks_file, t1, t2):
 
     power = get_average_tel_power(t1, t2)
 
-    eclfile = 'ECLIPSE_HISTORY_2015.txt'
+    eclfile = pathjoin(AXAFDATA, 'ECLIPSE_HISTORY.txt')
     ecltext = get_eclipse_text(eclfile, t1, t2)
 
     allviolations, missingmsids, checkedmsids = check_violations(thermdict, t1, t2)
-    allviolations = add_violation_info(allviolations)
 
     # 3shtren and 4csdhav are not decommed correctly in the CXC archive
     if '3shtren' in allviolations.keys():
