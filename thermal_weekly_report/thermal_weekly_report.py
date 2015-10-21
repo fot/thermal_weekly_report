@@ -391,7 +391,7 @@ def post_report(rootdir):
             thermal_msid_checks_file = home + '/AXAFDATA/weekly_report_data/thermalmsiddata.pkl'
             newfile = write_report(thermal_msid_checks_file, t1, t2)
             copyfile(newfile, pathjoin(reportdir, newfile))
-            copyfile('ThermalWeeklyReport.css', pathjoin(reportdir, 'ThermalWeeklyReport.css'))
+            copyfile(home + '/AXAFLIB/thermal_weekly_report/thermal_weekly_report/ThermalWeeklyReport.css', pathjoin(reportdir, 'ThermalWeeklyReport.css'))
             print 'copied files'
 
 
