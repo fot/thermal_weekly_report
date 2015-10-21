@@ -353,7 +353,7 @@ def write_report(thermal_msid_checks_file, t1, t2):
 
     html_limit_change_table = 'None'
 
-    env = ja.Environment(loader=ja.FileSystemLoader('./templates'))
+    env = ja.Environment(loader=ja.FileSystemLoader(home + '/AXAFLIB/thermal_weekly_report/thermal_weekly_report/templates'))
 
     template = env.get_template('thermal_weekly_template.htm')
     webpage = template.render(startday=t1,
