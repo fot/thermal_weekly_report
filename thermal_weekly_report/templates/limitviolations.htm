@@ -22,10 +22,10 @@
                     <td> Expected State </td>
                     <td>{{ violations[key]['state']['startdate'] }}</td>
                     <td>{{ violations[key]['state']['stopdate'] }}</td>
-                    <td>{{ '%9.3f'| format(violations[key]['state']['duration']) }}
-                    <td>{{ violations[key]['state']['num_excursions']}}
-                    <td>{{ violations[key]['state']['extrema']|upper}}
-                    <td>{{ violations[key]['state']['limit']|upper}}
+                    <td>{{ '%9.3f'| format(violations[key]['state']['duration']) }}</td>
+                    <td>{{ violations[key]['state']['num_excursions']}}</td>
+                    <td>{{ violations[key]['state']['extrema']|upper}}</td>
+                    <td>{{ violations[key]['state']['limit']|upper}}</td>
                 </tr>
             {% endif %}
                 {% if 'warning_high' in violations[key].keys() %}
@@ -35,10 +35,10 @@
                         <td> Warning High </td>
                         <td>{{ violations[key]['warning_high']['startdate'] }}</td>
                         <td>{{ violations[key]['warning_high']['stopdate'] }}</td>
-                        <td>{{ '%9.3f'| format(violations[key]['warning_high']['duration']) }}
-                        <td>{{ violations[key]['warning_high']['num_excursions']}}
-                        <td>{{ '%9.3f'| format(violations[key]['warning_high']['extrema'])}}
-                        <td>{{ violations[key]['warning_high']['limit']}}
+                        <td>{{ '%9.3f'| format(violations[key]['warning_high']['duration']) }}</td>
+                        <td>{{ violations[key]['warning_high']['num_excursions']}}</td>
+                        <td>{{ '%9.3f'| format(violations[key]['warning_high']['extrema'])}}</td>
+                        <td>{{ violations[key]['warning_high']['limit']}}</td>
                     </tr>
                 {% endif %}
 
@@ -49,10 +49,10 @@
                         <td> Caution High </td>
                         <td>{{ violations[key]['caution_high']['startdate'] }}</td>
                         <td>{{ violations[key]['caution_high']['stopdate'] }}</td>
-                        <td>{{ '%9.3f'| format(violations[key]['caution_high']['duration']) }}
-                        <td>{{ violations[key]['caution_high']['num_excursions']}}
-                        <td>{{ '%9.3f'| format(violations[key]['caution_high']['extrema'])}}
-                        <td>{{ violations[key]['caution_high']['limit']}}
+                        <td>{{ '%9.3f'| format(violations[key]['caution_high']['duration']) }}</td>
+                        <td>{{ violations[key]['caution_high']['num_excursions']}}</td>
+                        <td>{{ '%9.3f'| format(violations[key]['caution_high']['extrema'])}}</td>
+                        <td>{{ violations[key]['caution_high']['limit']}}</td>
                     </tr>
                 {% endif %}
 
@@ -63,10 +63,10 @@
                         <td> Caution Low </td>
                         <td>{{ violations[key]['caution_low']['startdate'] }}</td>
                         <td>{{ violations[key]['caution_low']['stopdate'] }}</td>
-                        <td>{{ '%9.3f'| format(violations[key]['caution_low']['duration']) }}
-                        <td>{{ violations[key]['caution_low']['num_excursions']}}
-                        <td>{{ '%9.3f'| format(violations[key]['caution_low']['extrema'])}}
-                        <td>{{ violations[key]['caution_low']['limit']}}
+                        <td>{{ '%9.3f'| format(violations[key]['caution_low']['duration']) }}</td>
+                        <td>{{ violations[key]['caution_low']['num_excursions']}}</td>
+                        <td>{{ '%9.3f'| format(violations[key]['caution_low']['extrema'])}}</td>
+                        <td>{{ violations[key]['caution_low']['limit']}}</td>
                     </tr>
                 {% endif %}
 
@@ -77,10 +77,10 @@
                         <td> Warning Low </td>
                         <td>{{ violations[key]['warning_low']['startdate'] }}</td>
                         <td>{{ violations[key]['warning_low']['stopdate'] }}</td>
-                        <td>{{ '%9.3f'| format(violations[key]['warning_low']['duration']) }}
-                        <td>{{ violations[key]['warning_low']['num_excursions']}}
-                        <td>{{ '%9.3f'| format(violations[key]['warning_low']['extrema'])}}
-                        <td>{{ violations[key]['warning_low']['limit']}}
+                        <td>{{ '%9.3f'| format(violations[key]['warning_low']['duration']) }}</td>
+                        <td>{{ violations[key]['warning_low']['num_excursions']}}</td>
+                        <td>{{ '%9.3f'| format(violations[key]['warning_low']['extrema'])}}</td>
+                        <td>{{ violations[key]['warning_low']['limit']}}</td>
                     </tr>
                 {% endif %}
 
