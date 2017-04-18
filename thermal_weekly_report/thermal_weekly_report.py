@@ -337,7 +337,7 @@ def write_report(thermal_msid_checks_file, t1, t2):
 
     power = get_average_tel_power(t1, t2)
 
-    eclfile = pathjoin(AXAFDATA, 'ECLIPSE_HISTORY.txt')
+    eclfile = pathjoin(AXAFDATA, 'ECLIPSE.txt')
     ecltext = get_eclipse_text(eclfile, t1, t2)
 
     allviolations, missingmsids, checkedmsids = check_violations(thermdict, t1, t2)
