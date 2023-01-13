@@ -5,7 +5,7 @@ import jinja2 as ja
 # from BeautifulSoup import BeautifulSoup as bs
 from os.path import join as pathjoin
 from os.path import expanduser
-import cPickle as pickle
+import pickle as pickle
 from shutil import copyfile
 import argparse
 import os
@@ -48,7 +48,7 @@ def writeEclipseText(eclipse, ecllist):
 
     ecltext = []
     for eclnum in ecllist:
-        if eclipse[eclnum].has_key('umbra'):
+        if 'umbra' in eclipse[eclnum]:
             tstart = eclipse[eclnum]['entrancepenumbra']['Start Time']
             tstop = eclipse[eclnum]['exitpenumbra']['Stop Time']
             text = "Umbral Eclipse: Start Time = %s, End Time = %s<br>\n"\
@@ -76,7 +76,7 @@ def get_eclipse_text(eclfile, t1, t2):
     ecllist = []
     for k in eclipse['eclipse_nums']:
         tstart = eclipse[k]['entrancepenumbra']['startsec']
-        if eclipse[k].has_key('exitpenumbra'):
+        if 'exitpenumbra' in eclipse[k]:
             # This is used for a normal eclipse
             tstop = eclipse[k]['exitpenumbra']['stopsec']
         else:
@@ -152,7 +152,7 @@ def check_violations(thermdict, t1, t2):
     allviolations = {}
     missingmsids = []
     checkedmsids = []
-    for key in thermdict.keys():
+    for key in list(thermdict.keys()):
         greta_msid = thermdict[key]['greta_msid']
         try:
             if thermdict[key]['type'] == 'limit':
@@ -170,7 +170,7 @@ def check_violations(thermdict, t1, t2):
                 allviolations[key] = process_violations(key, violations)
             
         except IndexError:
-            print('{} not in DB'.format(key))
+            print(('{} not in DB'.format(key)))
             missingmsids.append(key)
 
     return allviolations, missingmsids, checkedmsids
@@ -219,7 +219,7 @@ def process_violations(msid, violations):
     for v in violations:
         limtype = v[-1]
         if 'high' in limtype.lower():
-            if limtype not in violation_dict.keys():
+            if limtype not in list(violation_dict.keys()):
                 violation_dict.update({limtype:{'starttime':v[0][0], 'stoptime':v[0][-1], 'num_excursions':1,
                                                 'extrema':np.max(v[1]), 'limit':v[2][0], 'setid':v[3][0],
                                                 'duration':v[0][-1] - v[0][0]}})
@@ -231,7 +231,7 @@ def process_violations(msid, violations):
                 violation_dict[limtype]['duration'] = violation_dict[limtype]['duration'] + v[0][-1] - v[0][0]
 
         elif 'low' in limtype.lower():
-            if limtype not in violation_dict.keys():
+            if limtype not in list(violation_dict.keys()):
                 violation_dict.update({limtype:{'starttime':v[0][0], 'stoptime':v[0][-1], 'num_excursions':1,
                                                 'extrema':np.min(v[1]), 'limit':v[2][0], 'setid':v[3][0],
                                                 'duration':v[0][-1] - v[0][0]}})
@@ -243,7 +243,7 @@ def process_violations(msid, violations):
                 violation_dict[limtype]['duration'] = violation_dict[limtype]['duration'] + v[0][-1] - v[0][0]
 
         elif 'state' in limtype.lower():
-            if limtype not in violation_dict.keys():
+            if limtype not in list(violation_dict.keys()):
                 violation_dict.update({limtype:{'starttime':v[0][0], 'stoptime':v[0][-1], 'num_excursions':1,
                                                 'extrema':v[1][0], 'limit':v[2][0], 'setid':v[3][0],
                                                 'duration':v[0][-1] - v[0][0]}})
@@ -255,7 +255,7 @@ def process_violations(msid, violations):
 
                 
     for limittype in ['warning_low', 'caution_low', 'caution_high', 'warning_high', 'state']:
-        if limittype in violation_dict.keys():
+        if limittype in list(violation_dict.keys()):
             violation_dict[limittype]['duration'] = violation_dict[limittype]['duration'] / 3600.
             violation_dict[limittype]['description'] = desc
             violation_dict[limittype]['startdate'] = DateTime(violation_dict[limittype]['starttime']).date
@@ -328,7 +328,7 @@ def write_report(thermal_msid_checks_file, t1, t2):
     Note, in the past:
     thermal_msid_checks_file = 'thermalmsiddata.pkl'
     """
-    thermdict, missing, notinarchive = pickle.load(open(thermal_msid_checks_file, 'r'))
+    thermdict, missing, notinarchive = pickle.load(open(thermal_msid_checks_file, 'rb'))
 
     t1 = DateTime(t1).date
     t2 = DateTime(t2).date
@@ -343,10 +343,10 @@ def write_report(thermal_msid_checks_file, t1, t2):
     allviolations, missingmsids, checkedmsids = check_violations(thermdict, t1, t2)
 
     # 3shtren and 4csdhav are not decommed correctly in the CXC archive
-    if '3shtren' in allviolations.keys():
+    if '3shtren' in list(allviolations.keys()):
         _ = allviolations.pop('3shtren')
 
-    if '4csdhav' in allviolations.keys():
+    if '4csdhav' in list(allviolations.keys()):
         _ = allviolations.pop('4csdhav')
 
     limitchanges = check_limit_changes(t1, t2)
@@ -365,11 +365,11 @@ def write_report(thermal_msid_checks_file, t1, t2):
                               limitchanges=limitchanges)
 
     reportfilename = 'THERMAL_Weekly_' + dayrange + '.htm'
-    outfile = file(reportfilename, 'w+')
+    outfile = open(reportfilename, 'w+')
     outfile.writelines(webpage)
     outfile.close()
 
-    print('    Saved weekly report to {0}\n'.format(reportfilename))
+    print(('    Saved weekly report to {0}\n'.format(reportfilename)))
 
     return reportfilename
 
@@ -392,7 +392,7 @@ def post_report(rootdir):
             newfile = write_report(thermal_msid_checks_file, t1, t2)
             copyfile(newfile, pathjoin(reportdir, newfile))
             copyfile(home + '/AXAFLIB/thermal_weekly_report/thermal_weekly_report/ThermalWeeklyReport.css', pathjoin(reportdir, 'ThermalWeeklyReport.css'))
-            print 'copied files'
+            print('copied files')
 
 
 if __name__ == '__main__':
